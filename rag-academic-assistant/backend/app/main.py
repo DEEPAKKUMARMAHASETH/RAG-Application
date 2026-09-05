@@ -12,7 +12,7 @@ from .config import get_settings
 from .database import Base, engine, get_db
 from .models import Conversation, Document, Message, User
 from .rag import answer_question, delete_vectors, index_document, retrieve
-from .schemas import ChatRequest, ChatResponse, DocumentResponse, LoginRequest, RegisterRequest, TokenResponse, UserResponse
+from .schemas import ChatRequest, ChatResponse, ConversationUpdate, DocumentResponse, LoginRequest, RegisterRequest, TokenResponse, UserResponse
 
 
 settings = get_settings()
@@ -143,3 +143,22 @@ def conversation_detail(conversation_id: int, user: User = Depends(current_user)
     if not row:
         raise HTTPException(status_code=404, detail="Conversation not found")
     return {"id": row.id, "title": row.title, "messages": [{"id": msg.id, "role": msg.role, "content": msg.content, "citations": json.loads(msg.citations_json)} for msg in row.messages]}
+
+
+@app.patch("/api/conversations/{conversation_id}")
+def rename_conversation(conversation_id: int, data: ConversationUpdate, user: User = Depends(current_user), db: Session = Depends(get_db)):
+    row = db.scalar(select(Conversation).where(Conversation.id == conversation_id, Conversation.user_id == user.id))
+    if not row:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    row.title = data.title.strip()
+    db.commit()
+    return {"id": row.id, "title": row.title}
+
+
+@app.delete("/api/conversations/{conversation_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_conversation(conversation_id: int, user: User = Depends(current_user), db: Session = Depends(get_db)):
+    row = db.scalar(select(Conversation).where(Conversation.id == conversation_id, Conversation.user_id == user.id))
+    if not row:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    db.delete(row)
+    db.commit()

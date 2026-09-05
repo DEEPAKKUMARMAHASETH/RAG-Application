@@ -44,6 +44,10 @@ class ChatRequest(BaseModel):
     document_ids: list[int] | None = None
 
 
+class ConversationUpdate(BaseModel):
+    title: str = Field(min_length=1, max_length=200)
+
+
 class Citation(BaseModel):
     document_id: int
     filename: str
@@ -56,4 +60,3 @@ class ChatResponse(BaseModel):
     conversation_id: int
     answer: str
     citations: list[Citation]
-
