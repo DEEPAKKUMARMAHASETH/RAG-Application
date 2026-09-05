@@ -19,6 +19,26 @@ A single-server RAG application for PDF, DOCX and TXT documents. It uses FastAPI
 
 ## Production deployment
 
+### Automated EC2 setup (Ubuntu 24.04)
+
+After cloning the repository, run the one-time bootstrap:
+
+```bash
+bash scripts/setup-ec2.sh
+```
+
+Reconnect over SSH, then run:
+
+```bash
+cd /opt/studysource
+bash scripts/deploy.sh
+```
+
+For later releases use `bash scripts/update.sh`. Create a backup with
+`bash scripts/backup.sh` before major upgrades.
+
+### Manual setup
+
 ```bash
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y ca-certificates curl git
